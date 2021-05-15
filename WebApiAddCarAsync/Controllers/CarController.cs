@@ -21,7 +21,8 @@ namespace WebApiAddCarAsync.Controllers
         [HttpGet, Route("getall")]
         public async Task<IActionResult> GetAllCars() 
         {
-            return await Task.Run(() => { 
+            return await Task.Run(() => {
+                //  Повернення усіх обєктів з БД
                 return Ok(_context.Cars.AsQueryable());
             });
         }
@@ -30,6 +31,7 @@ namespace WebApiAddCarAsync.Controllers
         public async Task<IActionResult> AddCarToCollection([FromBody] AppCar Car) 
         {
            return await Task.Run(() => {
+               //  Формування нового обєкта
                var appcar = new AppCar
                {
                    Model = Car.Model,
@@ -39,8 +41,9 @@ namespace WebApiAddCarAsync.Controllers
                    Fuel = Car.Fuel,
                    Image = Car.Image
                };
+               //  Додавання обєкта у БД
                _context.Cars.Add(appcar);
-
+               //  Збереження данних у БД
                _context.SaveChanges();
                return Ok(appcar.Id.ToString());
                });
@@ -50,17 +53,20 @@ namespace WebApiAddCarAsync.Controllers
         public async Task<IActionResult> UpdateCarData([FromBody] AppCar Car) 
         {
             return await Task.Run(() => {
+                //  Отримання елемента для редагування
                 var car = _context.Cars.FirstOrDefault(x => x.Id == Car.Id);
+                //  Перевірка чи обєкт не пустий
                 if (car != null) 
                 {
-                car.Mark = Car.Mark;
-                car.Model = Car.Model;
-                car.Image = Car.Image;
-                car.Fuel = Car.Fuel;
-                car.Capacity = Car.Capacity;
-                car.Age = Car.Age;
-
-                _context.SaveChanges();
+                    //  Редагування
+                    car.Mark = Car.Mark;
+                    car.Model = Car.Model;
+                    car.Image = Car.Image;
+                    car.Fuel = Car.Fuel;
+                    car.Capacity = Car.Capacity;
+                    car.Age = Car.Age;
+                    //  Збереження змін
+                    _context.SaveChanges();
                 }
 
                 return Ok(new { result = "Дані відредаговано!" });
@@ -71,9 +77,11 @@ namespace WebApiAddCarAsync.Controllers
         public async Task<IActionResult> DeleteCar([FromBody] int Id) 
         {
             return await Task.Run(() => {
+                //  Отримання елемента з БД, який потім видалятиметься
                 AppCar car =_context.Cars.FirstOrDefault(x => x.Id == Id);
                 if (car != null) 
                 {
+                    //  Видалення і збереження змін БД
                     _context.Cars.Remove(car);
                     _context.SaveChanges();
                 }

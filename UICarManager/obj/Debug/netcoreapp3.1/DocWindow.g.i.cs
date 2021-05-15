@@ -53,7 +53,7 @@ namespace UICarManager {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/UICarManager;component/docwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/UICarManager;V1.0.0.0;component/docwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\DocWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

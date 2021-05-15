@@ -10,19 +10,25 @@ namespace WebApiAddCarAsync.Services
 {
     public static class DbSeeder
     {
+        //  Контекст, який відповідає за звязок з БД
         private static EFDbContext context { get; set; } = null;
         public static void SeedAll(this IApplicationBuilder app) 
         {
+            //  Діставання сервіса, який дістає залежності із області проєкта
             using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope()) 
             {
+                //  Присвоєння контексту значення
                 context ??= scope.ServiceProvider.GetRequiredService<EFDbContext>();
+                //  Додавання даних у БД
                 SeedCars(context);
             }
         }
         private static void SeedCars(EFDbContext context) 
         {
+            //  Перевірка чи колекція автомобілів не пуста
             if (!context.Cars.Any()) 
             {
+                //  Додавання у БД колекцію автомобілів
                 context.Cars.AddRange(new List<AppCar> { 
                     new AppCar 
                     {
@@ -54,9 +60,10 @@ namespace WebApiAddCarAsync.Services
                         Image = "https://www.ixbt.com/img/n1/news/2020/5/1/rav-4-prime-1280x720_large.jpg"
                     }
                 });
-
+                //  Збереження данних
                 context.SaveChanges();
             }
         }
     }
 }
+

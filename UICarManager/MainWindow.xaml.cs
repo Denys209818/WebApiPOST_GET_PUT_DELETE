@@ -25,6 +25,7 @@ namespace UICarManager
     /// </summary>
     public partial class MainWindow : Window
     {
+        //  Колекція, яка містить інформацію про усі автомобілі з БД
         List<CarModel> models = new List<CarModel>();
 
         public MainWindow()
@@ -34,14 +35,21 @@ namespace UICarManager
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Dispatcher.Invoke(() =>
+            {
+                dgCars.CanUserAddRows = true;
+                dgCars.CellEditEnding += DgCars_CellEditEnding;
+                dgCars.AddingNewItem += DgCars_AddingNewItem;
+            });
+            //  Ініціалізація колекції автомобілів і присвоєння цих автомобілів до колекції models асинхронно
             models = await GetCars();
-
+            //  Формування ДагаГріда
             dgCars.ItemsSource = models;
-            
         }
 
         private void DgCars_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
+            //  Присвоєння новому елементу ДатаГріда "прапорця"
             e.NewItem = new CarModel
             {
                 IsNew = true
@@ -50,24 +58,34 @@ namespace UICarManager
 
         private void DgCars_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            //  Діставання елемента, який редагуєтсья
             var carEditing = e.EditingElement.DataContext as CarModel;
+            //  індекс редагуємого елемента
             int id = e.Column.DisplayIndex;
 
+            //  Перевірка чи колонка - це колонка з фотографією
             if (id == 1) 
             {
+                //  Відкриття вікна у якому задається посилання
                 RefWindow window = new RefWindow();
+                //  Присвоєння початкового значення поля діалогового вікна
                 window.GetData().Property = string.IsNullOrEmpty(carEditing.Image) ? "empty" : carEditing.Image;
+                //  Відкривання діалогового вікна
                 window.ShowDialog();
+                //  Повернення значення із діалогового вікна, а саме посилання
                 var el = window.GetData();
-                    
+                //  Перевірка чи посилання не містить помилок та чи воно не пусте
                 if (string.IsNullOrEmpty(el.Error) && !string.IsNullOrEmpty(el.Property)) 
                 {
+                    //  Встановлення посилання на зображення для елемента ДатаГріда
                     carEditing.Image = el.Property;
                 }
             }
 
+            //  Перевірка чи елемент не новостворений, а уже існучий в БД
             if (carEditing.Id > 0) 
             {
+                //  Запуск оновлення данних, який оновлює дані у БД
                 Task.Run(async () => {
                     string anwers = await UpdateDBData(carEditing);
                 });
@@ -83,20 +101,18 @@ namespace UICarManager
 
         private async Task<List<CarModel>> GetCars() 
         {
+            //  Отримання данних з БД
             return await Task.Run(() => {
                 try
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        dgCars.CanUserAddRows = true;
-                        dgCars.CellEditEnding += DgCars_CellEditEnding;
-                        dgCars.AddingNewItem += DgCars_AddingNewItem;
-                    });
+                    
+                    //  Формування нової колекції яка повертатиметься
                     List<CarModel> models_ = new List<CarModel>();
+                    //  Створення обєкта WebClient, який отримує запити з веб-сервісу
                     WebClient client = new WebClient();
-
+                    //  Десеріалізація з формата json у тип List<CarModel>
                     models_ = JsonConvert.DeserializeObject<List<CarModel>>(client.DownloadString(Constants.GET));
-
+                    //  Повернення колекції
                     return models_;
                 }
                 catch 
@@ -108,42 +124,52 @@ namespace UICarManager
 
         private async void UpdateData_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => { 
+            await Task.Run(() => {
+                //  Формування колекції, яка буде містити дані про результат доданих елементів
                 List<string> result = new List<string>();
                 foreach (var item in this.dgCars.Items.SourceCollection) 
             {
-                var CarModel = item as CarModel;
-                if (CarModel.IsNew) 
+                    //  Ініціалізація обєкта а саме приведення до типу
+                    var CarModel = item as CarModel;
+                    //  Перевірка чи елемент новий
+                    if (CarModel.IsNew) 
                 {
-                    CarModel.IsNew = false;
-                    WebRequest request = (HttpWebRequest)WebRequest.CreateHttp(Constants.ADD);
+                        //  Відключення прапорця
+                        CarModel.IsNew = false;
+                        //  Ініціалізація обєкта, який відправляє запити на веб-сервіс
+                        WebRequest request = (HttpWebRequest)WebRequest.CreateHttp(Constants.ADD);
+                        //  Встановлення формату відправки данних
+                        request.ContentType = "application/json";
+                        //  Встановлення типу відправки данних
+                        request.Method = "POST";
 
-                    request.ContentType = "application/json";
-                    request.Method = "POST";
+                        //  Формування потоку, який відправляє запит до веб-сервісу
+                        using (StreamWriter sw = new StreamWriter(request.GetRequestStream())) 
+                        {
+                                //  Відправка данних на веб-сервіс
+                                sw.Write(JsonConvert.SerializeObject(new { 
+                                Mark = string.IsNullOrEmpty(CarModel.Mark) ? "empty" : CarModel.Mark,
+                                Model = string.IsNullOrEmpty(CarModel.Model) ? "empty" : CarModel.Model,
+                                Image = string.IsNullOrEmpty(CarModel.Image) ? "empty" : CarModel.Image,
+                                Age = CarModel.Age,
+                                Capacity = CarModel.Capacity,
+                                Fuel = string.IsNullOrEmpty(CarModel.Fuel) ? "empty" : CarModel.Fuel
+                            }));
+                        }
 
-                    using (StreamWriter sw = new StreamWriter(request.GetRequestStream())) 
-                    {
-                        sw.Write(JsonConvert.SerializeObject(new { 
-                            Mark = string.IsNullOrEmpty(CarModel.Mark) ? "empty" : CarModel.Mark,
-                            Model = string.IsNullOrEmpty(CarModel.Model) ? "empty" : CarModel.Model,
-                            Image = string.IsNullOrEmpty(CarModel.Image) ? "empty" : CarModel.Image,
-                            Age = CarModel.Age,
-                            Capacity = CarModel.Capacity,
-                            Fuel = string.IsNullOrEmpty(CarModel.Fuel) ? "empty" : CarModel.Fuel
-                        }));
-                    }
-
-                    var response = (HttpWebResponse)request.GetResponse();
-
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream())) 
-                    {
+                        //  Отримання результату роботи запиту
+                        var response = (HttpWebResponse)request.GetResponse();
+                        //  Зчитування результату роботи запиту
+                        using (StreamReader sr = new StreamReader(response.GetResponseStream())) 
+                        {
                         result.Add(sr.ReadToEnd());
+                            //  Присвоєння новому елементу виданого з БД ідентифікатора
                             CarModel.Id = int.Parse(result.Last().ToString());
-                    }
+                        }
 
                     }
             }
-                      
+                //  Виведення повідомлення про успішне оновлення данних 
                 MessageBox.Show("Дані обновлено!");
                 
             });
@@ -153,15 +179,18 @@ namespace UICarManager
         private Task<string> UpdateDBData(CarModel Car) 
         {
             return Task.Run(() => {
-
+                //  Ініціалізація строки результату
                 string result = "";
+                //  Ініціалізація обєкту, який відправляє запити на веб-сервіс
                 WebRequest request = (HttpWebRequest)WebRequest.CreateHttp(Constants.UPDATE);
-
+                //  Встановлення типу відправки данних
                 request.ContentType = "application/json";
+                //  Встановлення способу відправки данних  
                 request.Method = "PUT";
-
+                //  Ініціалізація обєкту, який відправляє запит до веб-сервісу
                 using (StreamWriter sw = new StreamWriter(request.GetRequestStream()))
                 {
+                    //  Відправка запиту на веб-сервіс
                     sw.Write(JsonConvert.SerializeObject(new
                     {
                         Id = Car.Id,
@@ -173,9 +202,9 @@ namespace UICarManager
                         Fuel = string.IsNullOrEmpty(Car.Fuel) ? "empty" : Car.Fuel
                     }));
                 }
-
+                //  Отримання відповіді на запит
                 var response = (HttpWebResponse)request.GetResponse();
-
+                //  Зчитування результату відправки запиту
                 using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                 {
                     result = sr.ReadToEnd();
@@ -187,24 +216,32 @@ namespace UICarManager
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => {
-                Dispatcher.Invoke(() => { 
+                Dispatcher.Invoke(() => {
+                    //  Витягування активного елемента ДатаГріда
                     CarModel model = dgCars.SelectedItem as CarModel;
+                    //  Відключення прапорця
                     model.IsNew = false;
+                    //  Ініціалізація обєкта, який відправлятиме запит на веб-сервіс
                     HttpWebRequest request = (HttpWebRequest)WebRequest.CreateHttp(Constants.DELETE);
+                    //  Встановлення методу відправки данних
                     request.Method = "DELETE";
+                    //  Встановлення типу відправки данних
                     request.ContentType = "application/json";
-
+                    //  Ініціалізація обєкту, який відправляє дані на веб-сервіс
                     using (StreamWriter sw = new StreamWriter(request.GetRequestStream()))
                     {
+                        //  Відправка данних
                         sw.Write(JsonConvert.SerializeObject(model.Id));
                     }
-
+                    //  Отримання результату запиту
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    //  Зчитування результату запиту
                     using (StreamReader sr = new StreamReader(response.GetResponseStream())) 
                     {
                         var result = sr.ReadToEnd();
                     }
 
+                    //  Переініціалізація ДатаГріда
                     Dispatcher.Invoke(async () => {
                         List<CarModel> cars = new List<CarModel>();
                         cars.AddRange(models.Where(x => x.IsNew).ToList());
@@ -221,7 +258,8 @@ namespace UICarManager
         private async void btnDoc_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => {
-                Dispatcher.Invoke(() => { 
+                Dispatcher.Invoke(() => {
+                    //  Відкриття діалогового вікна з документацією
                     DocWindow window = new DocWindow();
                     window.ShowDialog();
                 });
