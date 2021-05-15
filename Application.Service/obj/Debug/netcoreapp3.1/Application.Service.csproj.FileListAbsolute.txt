@@ -1,0 +1,9 @@
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\bin\Debug\netcoreapp3.1\Application.Service.deps.json
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\bin\Debug\netcoreapp3.1\Application.Service.dll
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\bin\Debug\netcoreapp3.1\Application.Service.pdb
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.csprojAssemblyReference.cache
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.AssemblyInfoInputs.cache
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.AssemblyInfo.cs
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.csproj.CoreCompileInputs.cache
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.dll
+C:\Users\Denis\Desktop\WebAPI HomeWork\WebApiAddCarAsync\Application.Service\obj\Debug\netcoreapp3.1\Application.Service.pdb

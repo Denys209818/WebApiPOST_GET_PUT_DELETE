@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "5/sVlikj8tG/foPe+yYouA4rAx47h0A2gpGhIr9Lvrzg2J7yk+v1tTI6FBAmO7rBapjLzmtLSbIkrfa+ideHww==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Denis\\Desktop\\WebAPI HomeWork\\WebApiAddCarAsync\\UICarManager\\UICarManager.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Denis\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
